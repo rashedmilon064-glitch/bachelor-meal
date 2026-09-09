@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bachelor Meal</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #222;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    select, input, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+
+    button {
+      background: #222;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .meal-options {
+      display: flex;
+      gap: 10px;
+    }
+
+    .meal-options button {
+      flex: 1;
+    }
+
+    .result {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 15px;
+      background: #f0f0f0;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>🍚 Bachelor Meal</h1>
+    <p class="subtitle">Daily Meal Management System</p>
+
+    <div class="card">
+
+      <label>Select Member</label>
+
+      <select id="member">
+        <option value="">Select your name</option>
+        <option>Member 1</option>
+        <option>Member 2</option>
+        <option>Member 3</option>
+        <option>Member 4</option>
+        <option>Member 5</option>
+        <option>Member 6</option>
+        <option>Member 7</option>
+      </select>
+
+      <label>Today's Meal</label>
+
+      <input
+        type="number"
+        id="meal"
+        min="0"
+        step="0.5"
+        placeholder="Example: 2"
+      >
+
+      <button onclick="submitMeal()">Submit Today's Meal</button>
+
+    </div>
+
+    <div class="card">
+      <div class="result" id="result">
+        Your meal will appear here.
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+
+    function submitMeal() {
+
+      const member = document.getElementById("member").value;
+      const meal = document.getElementById("meal").value;
+      const result = document.getElementById("result");
+
+      if (!member) {
+        alert("Please select your name.");
+        return;
+      }
+
+      if (meal === "" || meal < 0) {
+        alert("Please enter your meal.");
+        return;
+      }
+
+      result.innerHTML =
+        "✅ " + member + " submitted " + meal + " meal(s) today.";
+
+    }
+
+  </script>
+
+</body>
+        </html>
