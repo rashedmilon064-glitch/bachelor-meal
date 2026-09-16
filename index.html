@@ -102,7 +102,7 @@
 
     <!-- Notebook Table -->
     <div class="card table-container">
-      <h3 id="tableTitle" style="margin-bottom: 10px; text-align: center; font-size: 16px;">মাসের মিলের খাতা</h3>
+      <h3 id="tableTitle" style="margin-bottom: 10px; text-align: center; font-size: 16px;">মিলের খাতা (September 2026)</h3>
       <table>
         <thead>
           <tr>
@@ -134,8 +134,8 @@
   </div>
 
   <script>
-    const SUPABASE_URL = "https://YOUR_SUPABASE_PROJECT_URL.supabase.co";
-    const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
+    const SUPABASE_URL = "https://nmgmxmwwfbrwarmalgxv.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_0nrG5QCnfUzIK7xPwZBKIg_9sp9LP_L";
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const members = ["kawser", "rashed", "amin", "soyon", "nifat", "ridoy", "new"];
@@ -155,6 +155,7 @@
         tbody.innerHTML += rowHtml;
       }
       updateTableTitle();
+      loadStoredMeals();
     }
 
     function updateTableTitle() {
@@ -163,8 +164,49 @@
       document.getElementById("tableTitle").innerText = `মিলের খাতা (${month} ${year})`;
     }
 
-    document.getElementById("monthSelect").addEventListener("change", updateTableTitle);
-    document.getElementById("yearInput").addEventListener("input", updateTableTitle);
+    document.getElementById("monthSelect").addEventListener("change", () => {
+      updateTableTitle();
+      loadStoredMeals();
+    });
+    
+    document.getElementById("yearInput").addEventListener("input", () => {
+      updateTableTitle();
+      loadStoredMeals();
+    });
+
+    async function loadStoredMeals() {
+      const month = document.getElementById("monthSelect").value;
+      const year = document.getElementById("yearInput").value;
+      const monthYear = `${month} ${year}`;
+
+      try {
+        const { data, error } = await _supabase
+          .from('meal_entries')
+          .select('*')
+          .eq('month_year', monthYear);
+
+        if (!error && data) {
+          // Reset table
+          for (let day = 1; day <= 31; day++) {
+            members.forEach(m => {
+              mealData[day][m] = "";
+              document.getElementById(`cell-${day}-${m}`).innerText = "-";
+            });
+          }
+          // Load data from Supabase
+          data.forEach(entry => {
+            const { member_name, date_day, meal_count } = entry;
+            if (mealData[date_day] && members.includes(member_name)) {
+              mealData[date_day][member_name] = meal_count === 0 ? "X" : meal_count;
+              document.getElementById(`cell-${date_day}-${member_name}`).innerText = mealData[date_day][member_name];
+            }
+          });
+          calculateTotals();
+        }
+      } catch (err) {
+        console.log("Loading error:", err);
+      }
+    }
 
     async function submitMeal() {
       const member = document.getElementById("member").value;
@@ -191,7 +233,7 @@
         }]);
         alert(`✅ ${day} ${month}-এর ${meal} মিল সেভ হয়েছে!`);
       } catch (err) {
-        alert("লোকাল সেভ হয়েছে, ডাটাবেজে আপডেট করতে Supabase সেটআপ চেক করুন।");
+        alert("ডাটাবেজে আপডেট করতে সমস্যা হয়েছে। Supabase RLS সেটিংস চেক করুন।");
       }
 
       document.getElementById("mealInput").value = "";
