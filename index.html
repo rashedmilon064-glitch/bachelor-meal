@@ -13,6 +13,14 @@
     h1 { text-align: center; margin-bottom: 5px; font-size: 22px; }
     .subtitle { text-align: center; color: #666; margin-bottom: 15px; font-size: 14px; }
     .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    
+    .month-year-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      justify-content: center;
+    }
+
     .form-group { display: flex; flex-wrap: wrap; gap: 8px; }
     .form-control { flex: 1; min-width: 100px; }
     label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 12px; }
@@ -37,6 +45,32 @@
     <p class="subtitle">ডিজিটাল মেস মিলের খাতা</p>
 
     <div class="card">
+      <!-- Month and Year Selection -->
+      <div class="month-year-group">
+        <div style="flex: 1;">
+          <label>মাস</label>
+          <select id="monthSelect">
+            <option value="January">জানুয়ারি</option>
+            <option value="February">ফেব্রুয়ারি</option>
+            <option value="March">মার্চ</option>
+            <option value="April">এপ্রিল</option>
+            <option value="May">মে</option>
+            <option value="June">জুন</option>
+            <option value="July">জুলাই</option>
+            <option value="August">আগস্ট</option>
+            <option value="September" selected>সেপ্টেম্বর</option>
+            <option value="October">অক্টোবর</option>
+            <option value="November">নভেম্বর</option>
+            <option value="December">ডিসেম্বর</option>
+          </select>
+        </div>
+        <div style="flex: 1;">
+          <label>সাল</label>
+          <input type="number" id="yearInput" value="2026" placeholder="যেমন: 2026">
+        </div>
+      </div>
+
+      <!-- Meal Entry Form -->
       <div class="form-group">
         <div class="form-control">
           <label>মেম্বার</label>
@@ -45,7 +79,7 @@
             <option value="kawser">কাওসার</option>
             <option value="rashed">রাশেদ</option>
             <option value="amin">আমিন</option>
-            <option value="soyon">শয়ন</option>
+            <option value="soyon">শয়ন</option>
             <option value="nifat">নিফাত</option>
             <option value="ridoy">হৃদয়</option>
             <option value="new">নিউ</option>
@@ -66,8 +100,9 @@
       <button onclick="submitMeal()">মিল সেভ করুন</button>
     </div>
 
+    <!-- Notebook Table -->
     <div class="card table-container">
-      <h3 style="margin-bottom: 10px; text-align: center; font-size: 15px;">মাসের মিলের খাতা</h3>
+      <h3 id="tableTitle" style="margin-bottom: 10px; text-align: center; font-size: 16px;">মাসের মিলের খাতা</h3>
       <table>
         <thead>
           <tr>
@@ -75,7 +110,7 @@
             <th>কাওসার</th>
             <th>রাশেদ</th>
             <th>আমিন</th>
-            <th>শোভন</th>
+            <th>শয়ন</th>
             <th>নিফাত</th>
             <th>হৃদয়</th>
             <th>নিউ</th>
@@ -119,12 +154,24 @@
         rowHtml += `</tr>`;
         tbody.innerHTML += rowHtml;
       }
+      updateTableTitle();
     }
+
+    function updateTableTitle() {
+      const month = document.getElementById("monthSelect").value;
+      const year = document.getElementById("yearInput").value;
+      document.getElementById("tableTitle").innerText = `মিলের খাতা (${month} ${year})`;
+    }
+
+    document.getElementById("monthSelect").addEventListener("change", updateTableTitle);
+    document.getElementById("yearInput").addEventListener("input", updateTableTitle);
 
     async function submitMeal() {
       const member = document.getElementById("member").value;
       const day = parseInt(document.getElementById("dateInput").value);
       const meal = parseFloat(document.getElementById("mealInput").value);
+      const month = document.getElementById("monthSelect").value;
+      const year = document.getElementById("yearInput").value;
 
       if (!member || isNaN(day) || day < 1 || day > 31 || isNaN(meal) || meal < 0) {
         alert("সবগুলো তথ্য সঠিকভাবে দিন!");
@@ -136,8 +183,13 @@
       calculateTotals();
 
       try {
-        await _supabase.from('meal_entries').insert([{ member_name: member, date_day: day, meal_count: meal }]);
-        alert(`✅ ${day} তারিখের ${meal} মিল সেভ হয়েছে!`);
+        await _supabase.from('meal_entries').insert([{ 
+          member_name: member, 
+          date_day: day, 
+          meal_count: meal,
+          month_year: `${month} ${year}`
+        }]);
+        alert(`✅ ${day} ${month}-এর ${meal} মিল সেভ হয়েছে!`);
       } catch (err) {
         alert("লোকাল সেভ হয়েছে, ডাটাবেজে আপডেট করতে Supabase সেটআপ চেক করুন।");
       }
