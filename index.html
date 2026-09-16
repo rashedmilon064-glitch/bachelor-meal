@@ -4,141 +4,44 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bachelor Meal Sheet</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      color: #222;
-      padding: 15px;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: auto;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 5px;
-      color: #1a1a1a;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: #666;
-      margin-bottom: 20px;
-    }
-
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-
-    .form-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .form-control {
-      flex: 1;
-      min-width: 140px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    select, input, button {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 15px;
-    }
-
-    button {
-      background: #222;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-
-    button:hover {
-      background: #000;
-    }
-
-    /* Table Design like Notebook */
-    .table-container {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: center;
-      background: #fff;
-    }
-
-    th, td {
-      border: 1px solid #c4c4c4;
-      padding: 8px 4px;
-      font-size: 14px;
-    }
-
-    th {
-      background-color: #e9ecef;
-      color: #333;
-      font-weight: bold;
-    }
-
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-
-    .date-col {
-      font-weight: bold;
-      background-color: #f0f0f0;
-      width: 50px;
-    }
-
-    .total-row {
-      background-color: #e2e8f0 !important;
-      font-weight: bold;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f4f6f8; color: #222; padding: 10px; }
+    .container { max-width: 100%; margin: auto; }
+    h1 { text-align: center; margin-bottom: 5px; font-size: 22px; }
+    .subtitle { text-align: center; color: #666; margin-bottom: 15px; font-size: 14px; }
+    .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .form-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .form-control { flex: 1; min-width: 100px; }
+    label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 12px; }
+    select, input, button { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; }
+    button { background: #10b981; color: white; border: none; cursor: pointer; font-weight: bold; margin-top: 10px; }
+    button:hover { background: #059669; }
+    
+    .table-container { overflow-x: auto; background: #fff; border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; }
+    th, td { border: 1px solid #d1d5db; padding: 6px 3px; min-width: 40px; }
+    th { background-color: #f3f4f6; font-weight: bold; }
+    tr:nth-child(even) { background-color: #fafafa; }
+    .date-col { font-weight: bold; background-color: #e5e7eb; width: 35px; }
+    .total-row { background-color: #e5e7eb !important; font-weight: bold; }
   </style>
 </head>
 
 <body>
 
   <div class="container">
-
     <h1>🍚 Bachelor Meal Sheet</h1>
-    <p class="subtitle">ডিজিটাল মিলের খাতা</p>
+    <p class="subtitle">ডিজিটাল মেস মিলের খাতা</p>
 
-    <!-- Input Form Card -->
     <div class="card">
       <div class="form-group">
         <div class="form-control">
-          <label>মেম্বার সিলেক্ট করুন</label>
+          <label>মেম্বার</label>
           <select id="member">
-            <option value="">নাম বেছে নিন</option>
+            <option value="">বাছাই করুন</option>
             <option value="kawser">কাওসার</option>
             <option value="rashed">রাশেদ</option>
             <option value="amin">আমিন</option>
@@ -151,11 +54,11 @@
 
         <div class="form-control">
           <label>তারিখ (১-৩১)</label>
-          <input type="number" id="dateInput" min="1" max="31" placeholder="যেমন: ১">
+          <input type="number" id="dateInput" min="1" max="31" placeholder="তারিখ">
         </div>
 
         <div class="form-control">
-          <label>আজকের মিল</label>
+          <label>মিল</label>
           <input type="number" id="mealInput" min="0" step="0.5" placeholder="যেমন: ২">
         </div>
       </div>
@@ -163,9 +66,8 @@
       <button onclick="submitMeal()">মিল সেভ করুন</button>
     </div>
 
-    <!-- Notebook Table Card -->
     <div class="card table-container">
-      <h3 style="margin-bottom: 12px; text-align: center;">মাসের মিলের হিসাব</h3>
+      <h3 style="margin-bottom: 10px; text-align: center; font-size: 15px;">মাসের মিলের খাতা</h3>
       <table>
         <thead>
           <tr>
@@ -179,11 +81,9 @@
             <th>নিউ</th>
           </tr>
         </thead>
-        <tbody id="mealTableBody">
-          <!-- 1 to 31 Days generated dynamically -->
-        </tbody>
+        <tbody id="mealTableBody"></tbody>
         <tfoot>
-          <tr class="total-row" id="totalRow">
+          <tr class="total-row">
             <td>মোট</td>
             <td id="tot-kawser">0</td>
             <td id="tot-rashed">0</td>
@@ -196,79 +96,67 @@
         </tfoot>
       </table>
     </div>
-
   </div>
 
   <script>
+    const SUPABASE_URL = "https://YOUR_SUPABASE_PROJECT_URL.supabase.co";
+    const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     const members = ["kawser", "rashed", "amin", "soyon", "nifat", "ridoy", "new"];
     const mealData = {};
 
-    // Initialize Table with 31 Rows
     function initTable() {
       const tbody = document.getElementById("mealTableBody");
       tbody.innerHTML = "";
-
       for (let day = 1; day <= 31; day++) {
         mealData[day] = {};
         let rowHtml = `<tr><td class="date-col">${day}</td>`;
-        
         members.forEach(m => {
           mealData[day][m] = "";
           rowHtml += `<td id="cell-${day}-${m}">-</td>`;
         });
-
         rowHtml += `</tr>`;
         tbody.innerHTML += rowHtml;
       }
     }
 
-    // Submit Meal Function
-    function submitMeal() {
+    async function submitMeal() {
       const member = document.getElementById("member").value;
       const day = parseInt(document.getElementById("dateInput").value);
       const meal = parseFloat(document.getElementById("mealInput").value);
 
-      if (!member) {
-        alert("মেম্বারের নাম সিলেক্ট করুন!");
-        return;
-      }
-      if (isNaN(day) || day < 1 || day > 31) {
-        alert("সঠিক তারিখ (১ থেকে ৩১) লিখুন!");
-        return;
-      }
-      if (isNaN(meal) || meal < 0) {
-        alert("সঠিক মিল সংখ্যা লিখুন!");
+      if (!member || isNaN(day) || day < 1 || day > 31 || isNaN(meal) || meal < 0) {
+        alert("সবগুলো তথ্য সঠিকভাবে দিন!");
         return;
       }
 
-      // Update Data
       mealData[day][member] = meal === 0 ? "X" : meal;
       document.getElementById(`cell-${day}-${member}`).innerText = mealData[day][member];
-
       calculateTotals();
 
-      // Clear Inputs
+      try {
+        await _supabase.from('meal_entries').insert([{ member_name: member, date_day: day, meal_count: meal }]);
+        alert(`✅ ${day} তারিখের ${meal} মিল সেভ হয়েছে!`);
+      } catch (err) {
+        alert("লোকাল সেভ হয়েছে, ডাটাবেজে আপডেট করতে Supabase সেটআপ চেক করুন।");
+      }
+
       document.getElementById("mealInput").value = "";
-      alert(`✅ ${day} তারিখে ${member}-এর জন্য ${meal} মিল যুক্ত হয়েছে!`);
     }
 
-    // Calculate Total Meals per Member
     function calculateTotals() {
       members.forEach(m => {
         let total = 0;
         for (let day = 1; day <= 31; day++) {
           let val = mealData[day][m];
-          if (typeof val === "number") {
-            total += val;
-          }
+          if (typeof val === "number") total += val;
         }
         document.getElementById(`tot-${m}`).innerText = total;
       });
     }
 
-    // Run on load
     initTable();
   </script>
-
 </body>
 </html>
