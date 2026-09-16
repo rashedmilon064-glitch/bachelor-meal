@@ -70,22 +70,26 @@
       opacity: 0.9;
     }
 
-    .meal-options {
-      display: flex;
-      gap: 10px;
-    }
-
-    .meal-options button {
-      flex: 1;
-    }
-
     .result {
       text-align: center;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
       padding: 15px;
       background: #f0f0f0;
       border-radius: 10px;
+    }
+
+    .history-list {
+      margin-top: 15px;
+      list-style: none;
+      padding: 0;
+    }
+
+    .history-item {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
     }
   </style>
 </head>
@@ -128,19 +132,21 @@
 
     <div class="card">
       <div class="result" id="result">
-        Your meal will appear here.
+        Your meal submission status will appear here.
       </div>
+      <ul class="history-list" id="historyList"></ul>
     </div>
 
   </div>
 
   <script>
+    let mealEntries = [];
 
     function submitMeal() {
-
       const member = document.getElementById("member").value;
       const meal = document.getElementById("meal").value;
       const result = document.getElementById("result");
+      const historyList = document.getElementById("historyList");
 
       if (!member) {
         alert("Please select your name.");
@@ -152,12 +158,27 @@
         return;
       }
 
-      result.innerHTML =
-        "✅ " + member + " submitted " + meal + " meal(s) today.";
+      const today = new Date().toLocaleDateString();
+      mealEntries.unshift({ member, meal, date: today });
 
+      result.innerHTML = "✅ " + member + " submitted " + meal + " meal(s) today.";
+
+      renderHistory();
+      document.getElementById("meal").value = "";
     }
 
+    function renderHistory() {
+      const historyList = document.getElementById("historyList");
+      historyList.innerHTML = "";
+
+      mealEntries.forEach(entry => {
+        const li = document.createElement("li");
+        li.className = "history-item";
+        li.innerHTML = `<span><strong>${entry.member}</strong> (${entry.date})</span> <span>${entry.meal} Meal(s)</span>`;
+        historyList.appendChild(li);
+      });
+    }
   </script>
 
 </body>
-        </html>
+</html>
