@@ -49,7 +49,7 @@
         </select>
 
         <input type="number" id="dateInput" min="1" max="31" placeholder="তারিখ (১-৩১)">
-        <input type="number" id="countInput" step="0.5" min="0" placeholder="মিল (যেমন: ১ বা ১.৫)">
+        <input type="number" id="countInput" step="0.5" min="0" placeholder="মিল সংখ্যা">
         <button onclick="saveMeal()">মিল সেভ করুন</button>
     </div>
 
@@ -78,7 +78,7 @@
 
 <script>
     const SUPABASE_URL = "https://nmgmxmwwfbrwarmalgxv.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZ214bXd3ZmJyd2FybWFsZ3h2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIzOTM0NjUsImV4cCI6MjA1Nzk2OTQ2NX0.9JmH1mO3cI1n4fWl6-uQG1A22V1P8Z1R8k1v4y8W0X4";
+    const SUPABASE_KEY = "sb_publishable_0nrG5QCnfUzIK7xPwZBKIg_9sp9LP_L";
     
     const { createClient } = window.supabase;
     const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -132,6 +132,9 @@
                 statusDiv.style.color = "red";
                 statusDiv.innerText = "❌ লোড করতে সমস্যা: " + error.message;
             }
+            return;
+        } else {
+            if(statusDiv) statusDiv.innerText = "";
         }
 
         const mealData = {};
