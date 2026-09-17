@@ -53,7 +53,7 @@
 
     <div class="notice-container">
         <div class="notice-text">
-            📌 বিশেষ বিজ্ঞপ্তি: মিল সেভ করার ১২ ঘণ্টার মধ্যে পরিবর্তন করা যাবে। ১২ ঘণ্টা পার হয়ে গেলে আর কোনো এডিট বা পরিবর্তন করা সম্ভব নয়।
+            📌 বিশেষ বিজ্ঞপ্তি: মিল সেভ করার ১২ ঘণ্টার মধ্যে নিজ PIN ব্যবহার করে পরিবর্তন করা যাবে। ১২ ঘণ্টা পার হয়ে গেলে আর কোনো এডিট করা সম্ভব নয়।
         </div>
     </div>
     
@@ -79,6 +79,7 @@
 
         <input type="number" id="dateInput" min="1" max="31" placeholder="তারিখ (১-৩১)">
         <input type="number" id="countInput" step="0.5" min="0" placeholder="মিল সংখ্যা">
+        <input type="password" id="pinInput" placeholder="৪ ডিজিটের PIN" maxlength="4" style="width: 110px;">
         <button onclick="saveMeal()">মিল সেভ করুন</button>
     </div>
 
@@ -114,23 +115,42 @@
 
     const members = ["কাওসার", "রাশেদ", "আমিন", "শয়ন", "নিফাত", "হৃদয়", "নিউ"];
 
+    // মেম্বারদের PIN কোড (প্রয়োজনে আপনি পিনগুলো বদলে দিতে পারেন)
+    const memberPins = {
+        "কাওসার": "1001",
+        "রাশেদ": "1002",
+        "আমিন": "1003",
+        "শয়ন": "1004",
+        "নিফাত": "1005",
+        "হৃদয়": "1006",
+        "নিউ": "1007"
+    };
+
     async function saveMeal() {
         const month = document.getElementById("monthSelect").value;
         const member = document.getElementById("memberSelect").value;
         const date = parseInt(document.getElementById("dateInput").value);
         const count = parseFloat(document.getElementById("countInput").value);
+        const pin = document.getElementById("pinInput").value;
         const statusDiv = document.getElementById("status");
 
-        if (!member || isNaN(date) || isNaN(count)) {
+        if (!member || isNaN(date) || isNaN(count) || !pin) {
             statusDiv.style.color = "red";
-            statusDiv.innerText = "❌ অনুগ্রহ করে সব ফিল্ড সঠিকভাবে পূরণ করুন!";
+            statusDiv.innerText = "❌ নাম, তারিখ, মিল সংখ্যা ও PIN সঠিকভাবে দিন!";
+            return;
+        }
+
+        // PIN ভ্যালিডেশন
+        if (memberPins[member] !== pin) {
+            statusDiv.style.color = "red";
+            statusDiv.innerText = "❌ ভুল PIN! আপনি অন্য কারো মিল সেভ বা এডিট করতে পারবেন না।";
             return;
         }
 
         statusDiv.style.color = "blue";
         statusDiv.innerText = "⏳ যাচাই করা হচ্ছে...";
 
-        // ১. আগে চেক করব এই ঘরে ডাটা আছে কিনা এবং তৈরি করার সময়
+        // ১২ ঘণ্টার লকিং চেক
         const { data: existingData } = await _supabase
             .from('meals')
             .select('*')
@@ -155,7 +175,6 @@
 
         statusDiv.innerText = "⏳ সেভ হচ্ছে...";
 
-        // ২. ডাটা সেভ
         const { data, error } = await _supabase
             .from('meals')
             .upsert({ month, member, date, count }, { onConflict: 'month,member,date' });
@@ -168,6 +187,7 @@
             statusDiv.style.color = "green";
             statusDiv.innerText = "✅ সফলভাবে সেভ হয়েছে!";
             document.getElementById("countInput").value = "";
+            document.getElementById("pinInput").value = "";
             loadMeals();
         }
     }
