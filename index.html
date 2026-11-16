@@ -7,8 +7,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 10px; background-color: #f4f6f9; margin: 0; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h2, h3 { text-align: center; color: #333; margin-top: 5px; margin-bottom: 5px; }
+        .container { max-width: 850px; margin: 0 auto; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2, h3 { text-align: center; color: #333; margin-top: 8px; margin-bottom: 8px; }
         
         .notice-container {
             background-color: #fff3cd;
@@ -25,25 +25,60 @@
         .notice-text {
             display: inline-block;
             padding-left: 100%;
-            animation: marquee 15s linear infinite;
+            animation: marquee 18s linear infinite;
         }
         @keyframes marquee {
             0% { transform: translate(0, 0); }
             100% { transform: translate(-100%, 0); }
         }
 
-        .form-group { margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
-        label { font-weight: bold; }
-        select, input, button { padding: 8px 12px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; }
-        button { background-color: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; width: 100%; max-width: 200px; }
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .card {
+            background: #e9f5ff;
+            border: 1px solid #b8daff;
+            padding: 10px 5px;
+            border-radius: 8px;
+        }
+        .card.rate-card {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .card h4 { margin: 0 0 5px 0; font-size: 12px; color: #555; }
+        .card p { margin: 0; font-size: 16px; font-weight: bold; color: #004085; }
+        .card.rate-card p { color: #155724; }
+
+        .section-box {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 18px;
+            background-color: #fafafa;
+        }
+
+        .form-group { margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; }
+        label { font-weight: bold; font-size: 14px; }
+        select, input, button { padding: 8px 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; }
+        button { background-color: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; width: 100%; max-width: 180px; }
         button:hover { background-color: #218838; }
-        .table-container { overflow-x: auto; margin-top: 15px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; }
+        .btn-bazar { background-color: #17a2b8; }
+        .btn-bazar:hover { background-color: #138496; }
+
+        .table-container { overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; background: white; }
         th, td { border: 1px solid #ddd; padding: 6px 4px; }
         th { background-color: #007bff; color: white; }
+        .bazar-table th { background-color: #17a2b8; }
         tr:nth-child(even) { background-color: #f8f9fa; }
-        .total-row { font-weight: bold; background-color: #e2e3e5; }
-        #status { text-align: center; font-weight: bold; margin-top: 5px; }
+        .total-row { font-weight: bold; background-color: #e2e3e5 !important; }
+        #status, #bazarStatus { text-align: center; font-weight: bold; margin-top: 5px; font-size: 13px; }
+        .positive { color: green; font-weight: bold; }
+        .negative { color: red; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -53,13 +88,14 @@
 
     <div class="notice-container">
         <div class="notice-text">
-            📌 বিশেষ বিজ্ঞপ্তি: মিল সেভ করার ১২ ঘণ্টার মধ্যে নিজ PIN ব্যবহার করে পরিবর্তন করা যাবে। ১২ ঘণ্টা পার হয়ে গেলে আর কোনো এডিট করা সম্ভব নয়।
+            📌 বিশেষ বিজ্ঞপ্তি: মিল সেভ করার ১২ ঘণ্টার মধ্যে নিজ PIN ব্যবহার করে পরিবর্তন করা যাবে। ১২ ঘণ্টা পার হয়ে গেলে আর কোনো এডিট করা সম্ভব নয়। বাজারের টাকা যেকোনো সময় নিজ PIN দিয়ে আপডেট করা যাবে।
         </div>
     </div>
     
+    <!-- মাস নির্বাচন -->
     <div class="form-group">
-        <label>মাস:</label>
-        <select id="monthSelect" onchange="loadMeals()">
+        <label>মাস নির্বাচন করুন:</label>
+        <select id="monthSelect" onchange="loadAllData()">
             <optgroup label="২০২৬ সাল">
                 <option value="September 2026">সেপ্টেম্বর ২০২৬</option>
                 <option value="October 2026">অক্টোবর ২০২৬</option>
@@ -83,27 +119,86 @@
         </select>
     </div>
 
-    <div class="form-group">
-        <select id="memberSelect">
-            <option value="">মেম্বার বাছাই করুন</option>
-            <option value="কাওসার">কাওসার</option>
-            <option value="রাশেদ">রাশেদ</option>
-            <option value="আমিন">আমিন</option>
-            <option value="শয়ন">শয়ন</option>
-            <option value="নিউ">নিউ</option>
-            <option value="হৃদয়">হৃদয়</option>
-            <option value="সানজিদ">সানজিদ</option>
-        </select>
-
-        <input type="number" id="dateInput" min="1" max="31" placeholder="তারিখ (১-৩১)">
-        <input type="number" id="countInput" step="0.5" min="0" placeholder="মিল সংখ্যা">
-        <input type="password" id="pinInput" placeholder="৪ ডিজিটের PIN" maxlength="4" style="width: 110px;">
-        <button onclick="saveMeal()">মিল সেভ করুন</button>
+    <!-- লাইভ মিল রেট ও সারসংক্ষেপ -->
+    <div class="summary-cards">
+        <div class="card">
+            <h4>মোট মিল</h4>
+            <p id="summaryTotalMeals">0</p>
+        </div>
+        <div class="card">
+            <h4>মোট বাজার (টাকা)</h4>
+            <p id="summaryTotalBazar">0 ৳</p>
+        </div>
+        <div class="card rate-card">
+            <h4>বর্তমান মিল রেট</h4>
+            <p id="summaryMealRate">0.00 ৳</p>
+        </div>
     </div>
 
-    <div id="status"></div>
+    <!-- ১. মিল এন্ট্রি সেকশন -->
+    <div class="section-box">
+        <h3>🍽️ প্রতিদিনের মিল এন্ট্রি</h3>
+        <div class="form-group">
+            <select id="memberSelect">
+                <option value="">মেম্বার বাছাই করুন</option>
+                <option value="কাওসার">কাওসার</option>
+                <option value="রাশেদ">রাশেদ</option>
+                <option value="আমিন">আমিন</option>
+                <option value="শয়ন">শয়ন</option>
+                <option value="নিউ">নিউ</option>
+                <option value="হৃদয়">হৃদয়</option>
+                <option value="সানজিদ">সানজিদ</option>
+            </select>
 
-    <h3>মিলের খাতা</h3>
+            <input type="number" id="dateInput" min="1" max="31" placeholder="তারিখ (১-৩১)" style="width: 110px;">
+            <input type="number" id="countInput" step="0.5" min="0" placeholder="মিল সংখ্যা" style="width: 100px;">
+            <input type="password" id="pinInput" placeholder="৪ ডিজিট PIN" maxlength="4" style="width: 100px;">
+            <button onclick="saveMeal()">মিল সেভ করুন</button>
+        </div>
+        <div id="status"></div>
+    </div>
+
+    <!-- ২. বাজার খরচ এন্ট্রি ও মিল রেট হিসাব সেকশন -->
+    <div class="section-box">
+        <h3>🛒 বাজার খরচ ও মিল রেট হিসাব</h3>
+        <p style="text-align: center; font-size: 12px; color: #666; margin-top: 0;">(প্রত্যেক সদস্যের ওই মাসের মোট বাজার খরচ এখানে বসান বা যোগ করে আপডেট করুন)</p>
+        <div class="form-group">
+            <select id="bazarMemberSelect">
+                <option value="">মেম্বার বাছাই করুন</option>
+                <option value="কাওসার">কাওসার</option>
+                <option value="রাশেদ">রাশেদ</option>
+                <option value="আমিন">আমিন</option>
+                <option value="শয়ন">শয়ন</option>
+                <option value="নিউ">নিউ</option>
+                <option value="হৃদয়">হৃদয়</option>
+                <option value="সানজিদ">সানজিদ</option>
+            </select>
+
+            <input type="number" id="bazarAmountInput" min="0" placeholder="মোট বাজারের টাকা" style="width: 140px;">
+            <input type="password" id="bazarPinInput" placeholder="৪ ডিজিট PIN" maxlength="4" style="width: 100px;">
+            <button class="btn-bazar" onclick="saveBazar()">বাজার সেভ করুন</button>
+        </div>
+        <div id="bazarStatus"></div>
+
+        <div class="table-container">
+            <table class="bazar-table">
+                <thead>
+                    <tr>
+                        <th>মেম্বার</th>
+                        <th>মোট মিল</th>
+                        <th>বাজার জমা (৳)</th>
+                        <th>মিল বিল (৳)</th>
+                        <th>হিসাব (পাবে / দিবে)</th>
+                    </tr>
+                </thead>
+                <tbody id="bazarTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ৩. প্রতিদিনের মিলের খাতা -->
+    <h3>📅 প্রতিদিনের মিলের খাতা</h3>
     <div class="table-container">
         <table>
             <thead>
@@ -143,6 +238,10 @@
         "সানজিদ": "1007"
     };
 
+    let currentMemberMeals = {};
+    let currentMemberBazar = {};
+
+    // মিল সেভ করার ফাংশন
     async function saveMeal() {
         const month = document.getElementById("monthSelect").value;
         const member = document.getElementById("memberSelect").value;
@@ -190,59 +289,88 @@
 
         statusDiv.innerText = "⏳ সেভ হচ্ছে...";
 
-        const { data, error } = await _supabase
+        const { error } = await _supabase
             .from('meals')
             .upsert({ month, member, date, count }, { onConflict: 'month,member,date' });
 
         if (error) {
-            console.error("Error saving:", error);
             statusDiv.style.color = "red";
             statusDiv.innerText = "❌ সেভ হয়নি: " + error.message;
         } else {
             statusDiv.style.color = "green";
-            statusDiv.innerText = "✅ সফলভাবে সেভ হয়েছে!";
+            statusDiv.innerText = "✅ মিল সফলভাবে সেভ হয়েছে!";
             document.getElementById("countInput").value = "";
             document.getElementById("pinInput").value = "";
-            loadMeals();
+            loadAllData();
         }
     }
 
-    async function loadMeals() {
+    // বাজার খরচ সেভ করার ফাংশন
+    async function saveBazar() {
         const month = document.getElementById("monthSelect").value;
-        const statusDiv = document.getElementById("status");
+        const member = document.getElementById("bazarMemberSelect").value;
+        const amount = parseFloat(document.getElementById("bazarAmountInput").value);
+        const pin = document.getElementById("bazarPinInput").value;
+        const bazarStatus = document.getElementById("bazarStatus");
 
-        const { data, error } = await _supabase
+        if (!member || isNaN(amount) || !pin) {
+            bazarStatus.style.color = "red";
+            bazarStatus.innerText = "❌ নাম, বাজারের টাকা ও PIN সঠিকভাবে দিন!";
+            return;
+        }
+
+        if (memberPins[member] !== pin) {
+            bazarStatus.style.color = "red";
+            bazarStatus.innerText = "❌ ভুল PIN! নিজ PIN ব্যবহার করুন।";
+            return;
+        }
+
+        bazarStatus.style.color = "blue";
+        bazarStatus.innerText = "⏳ বাজার সেভ হচ্ছে...";
+
+        const { error } = await _supabase
+            .from('bazar_expenses')
+            .upsert({ month, member, amount }, { onConflict: 'month,member' });
+
+        if (error) {
+            bazarStatus.style.color = "red";
+            bazarStatus.innerText = "❌ সেভ হয়নি: " + error.message;
+        } else {
+            bazarStatus.style.color = "green";
+            bazarStatus.innerText = "✅ বাজার খরচ সফলভাবে আপডেট হয়েছে!";
+            document.getElementById("bazarAmountInput").value = "";
+            document.getElementById("bazarPinInput").value = "";
+            loadAllData();
+        }
+    }
+
+    // সব ডাটা লোড এবং ক্যালকুলেশন
+    async function loadAllData() {
+        const month = document.getElementById("monthSelect").value;
+        
+        // ১. মিল ডাটা লোড
+        const { data: mealsData, error: mealError } = await _supabase
             .from('meals')
             .select('*')
             .eq('month', month);
 
-        if (error) {
-            console.error("Error loading:", error);
-            if(statusDiv) {
-                statusDiv.style.color = "red";
-                statusDiv.innerText = "❌ লোড করতে সমস্যা: " + error.message;
-            }
+        if (mealError) {
+            console.error(mealError);
             return;
-        } else {
-            if(statusDiv && statusDiv.innerText.startsWith("❌")) {
-                // Keep error
-            } else if(statusDiv) {
-                statusDiv.innerText = "";
-            }
         }
 
-        const mealData = {};
-        if (data) {
-            data.forEach(item => {
-                if (!mealData[item.date]) mealData[item.date] = {};
-                mealData[item.date][item.member] = item.count;
+        const mealMap = {};
+        if (mealsData) {
+            mealsData.forEach(item => {
+                if (!mealMap[item.date]) mealMap[item.date] = {};
+                mealMap[item.date][item.member] = item.count;
             });
         }
 
         const tbody = document.getElementById("mealTableBody");
         tbody.innerHTML = "";
 
-        let totals = { "কাওসার": 0, "রাশেদ": 0, "আমিন": 0, "শয়ন": 0, "নিউ": 0, "হৃদয়": 0, "সানজিদ": 0 };
+        currentMemberMeals = { "কাওসার": 0, "রাশেদ": 0, "আমিন": 0, "শয়ন": 0, "নিউ": 0, "হৃদয়": 0, "সানজিদ": 0 };
 
         for (let d = 1; d <= 31; d++) {
             let tr = document.createElement("tr");
@@ -252,9 +380,9 @@
 
             members.forEach(m => {
                 let td = document.createElement("td");
-                let val = mealData[d] && mealData[d][m] !== undefined ? mealData[d][m] : "-";
+                let val = mealMap[d] && mealMap[d][m] !== undefined ? mealMap[d][m] : "-";
                 td.innerText = val;
-                if (val !== "-") totals[m] += parseFloat(val);
+                if (val !== "-") currentMemberMeals[m] += parseFloat(val);
                 tr.appendChild(td);
             });
 
@@ -267,16 +395,77 @@
         totalTdLabel.innerText = "মোট";
         totalTr.appendChild(totalTdLabel);
 
+        let grandTotalMeals = 0;
         members.forEach(m => {
             let td = document.createElement("td");
-            td.innerText = totals[m];
+            td.innerText = currentMemberMeals[m];
+            grandTotalMeals += currentMemberMeals[m];
             totalTr.appendChild(td);
         });
-
         tbody.appendChild(totalTr);
+
+        // ২. বাজার ডাটা লোড
+        const { data: bazarData, error: bazarError } = await _supabase
+            .from('bazar_expenses')
+            .select('*')
+            .eq('month', month);
+
+        currentMemberBazar = { "কাওসার": 0, "রাশেদ": 0, "আমিন": 0, "শয়ন": 0, "নিউ": 0, "হৃদয়": 0, "সানজিদ": 0 };
+
+        if (!bazarError && bazarData) {
+            bazarData.forEach(item => {
+                if (currentMemberBazar.hasOwnProperty(item.member)) {
+                    currentMemberBazar[item.member] = parseFloat(item.amount) || 0;
+                }
+            });
+        }
+
+        let grandTotalBazar = 0;
+        members.forEach(m => {
+            grandTotalBazar += currentMemberBazar[m];
+        });
+
+        // ৩. মিল রেট ক্যালকুলেশন
+        let mealRate = grandTotalMeals > 0 ? (grandTotalBazar / grandTotalMeals) : 0;
+
+        document.getElementById("summaryTotalMeals").innerText = grandTotalMeals;
+        document.getElementById("summaryTotalBazar").innerText = grandTotalBazar.toFixed(0) + " ৳";
+        document.getElementById("summaryMealRate").innerText = mealRate.toFixed(2) + " ৳";
+
+        // ৪. বাজার ও ফাইনাল হিসাব টেবিল রেন্ডার
+        const bazarTbody = document.getElementById("bazarTableBody");
+        bazarTbody.innerHTML = "";
+
+        members.forEach(m => {
+            let mMeals = currentMemberMeals[m];
+            let mBazar = currentMemberBazar[m];
+            let mCost = mMeals * mealRate;
+            let balance = mBazar - mCost;
+
+            let tr = document.createElement("tr");
+            
+            let statusText = "০ ৳";
+            let statusClass = "";
+            if (balance > 0.5) {
+                statusText = `পাবে +${balance.toFixed(0)} ৳`;
+                statusClass = "positive";
+            } else if (balance < -0.5) {
+                statusText = `দিবে ${Math.abs(balance).toFixed(0)} ৳`;
+                statusClass = "negative";
+            }
+
+            tr.innerHTML = `
+                <td><strong>${m}</strong></td>
+                <td>${mMeals}</td>
+                <td>${mBazar.toFixed(0)} ৳</td>
+                <td>${mCost.toFixed(0)} ৳</td>
+                <td class="${statusClass}">${statusText}</td>
+            `;
+            bazarTbody.appendChild(tr);
+        });
     }
 
-    window.onload = loadMeals;
+    window.onload = loadAllData;
 </script>
 
 </body>
