@@ -136,4 +136,148 @@
     const memberPins = {
         "কাওসার": "1001",
         "রাশেদ": "1002",
-        "আমিন": "100
+        "আমিন": "1003",
+        "শয়ন": "1004",
+        "নিউ": "1005",
+        "হৃদয়": "1006",
+        "সানজিদ": "1007"
+    };
+
+    async function saveMeal() {
+        const month = document.getElementById("monthSelect").value;
+        const member = document.getElementById("memberSelect").value;
+        const date = parseInt(document.getElementById("dateInput").value);
+        const count = parseFloat(document.getElementById("countInput").value);
+        const pin = document.getElementById("pinInput").value;
+        const statusDiv = document.getElementById("status");
+
+        if (!member || isNaN(date) || isNaN(count) || !pin) {
+            statusDiv.style.color = "red";
+            statusDiv.innerText = "❌ নাম, তারিখ, মিল সংখ্যা ও PIN সঠিকভাবে দিন!";
+            return;
+        }
+
+        if (memberPins[member] !== pin) {
+            statusDiv.style.color = "red";
+            statusDiv.innerText = "❌ ভুল PIN! আপনি অন্য কারো মিল সেভ বা এডিট করতে পারবেন না।";
+            return;
+        }
+
+        statusDiv.style.color = "blue";
+        statusDiv.innerText = "⏳ যাচাই করা হচ্ছে...";
+
+        const { data: existingData } = await _supabase
+            .from('meals')
+            .select('*')
+            .eq('month', month)
+            .eq('member', member)
+            .eq('date', date);
+
+        if (existingData && existingData.length > 0) {
+            const row = existingData[0];
+            if (row.created_at) {
+                const createdTime = new Date(row.created_at);
+                const now = new Date();
+                const diffInHours = (now - createdTime) / (1000 * 60 * 60);
+
+                if (diffInHours > 12) {
+                    statusDiv.style.color = "red";
+                    statusDiv.innerText = "❌ ১২ ঘণ্টার বেশি সময় পার হয়ে গেছে! এখন আর এডিট করা সম্ভব নয়।";
+                    return;
+                }
+            }
+        }
+
+        statusDiv.innerText = "⏳ সেভ হচ্ছে...";
+
+        const { data, error } = await _supabase
+            .from('meals')
+            .upsert({ month, member, date, count }, { onConflict: 'month,member,date' });
+
+        if (error) {
+            console.error("Error saving:", error);
+            statusDiv.style.color = "red";
+            statusDiv.innerText = "❌ সেভ হয়নি: " + error.message;
+        } else {
+            statusDiv.style.color = "green";
+            statusDiv.innerText = "✅ সফলভাবে সেভ হয়েছে!";
+            document.getElementById("countInput").value = "";
+            document.getElementById("pinInput").value = "";
+            loadMeals();
+        }
+    }
+
+    async function loadMeals() {
+        const month = document.getElementById("monthSelect").value;
+        const statusDiv = document.getElementById("status");
+
+        const { data, error } = await _supabase
+            .from('meals')
+            .select('*')
+            .eq('month', month);
+
+        if (error) {
+            console.error("Error loading:", error);
+            if(statusDiv) {
+                statusDiv.style.color = "red";
+                statusDiv.innerText = "❌ লোড করতে সমস্যা: " + error.message;
+            }
+            return;
+        } else {
+            if(statusDiv && statusDiv.innerText.startsWith("❌")) {
+                // Keep error
+            } else if(statusDiv) {
+                statusDiv.innerText = "";
+            }
+        }
+
+        const mealData = {};
+        if (data) {
+            data.forEach(item => {
+                if (!mealData[item.date]) mealData[item.date] = {};
+                mealData[item.date][item.member] = item.count;
+            });
+        }
+
+        const tbody = document.getElementById("mealTableBody");
+        tbody.innerHTML = "";
+
+        let totals = { "কাওসার": 0, "রাশেদ": 0, "আমিন": 0, "শয়ন": 0, "নিউ": 0, "হৃদয়": 0, "সানজিদ": 0 };
+
+        for (let d = 1; d <= 31; d++) {
+            let tr = document.createElement("tr");
+            let tdDate = document.createElement("td");
+            tdDate.innerText = d;
+            tr.appendChild(tdDate);
+
+            members.forEach(m => {
+                let td = document.createElement("td");
+                let val = mealData[d] && mealData[d][m] !== undefined ? mealData[d][m] : "-";
+                td.innerText = val;
+                if (val !== "-") totals[m] += parseFloat(val);
+                tr.appendChild(td);
+            });
+
+            tbody.appendChild(tr);
+        }
+
+        let totalTr = document.createElement("tr");
+        totalTr.className = "total-row";
+        let totalTdLabel = document.createElement("td");
+        totalTdLabel.innerText = "মোট";
+        totalTr.appendChild(totalTdLabel);
+
+        members.forEach(m => {
+            let td = document.createElement("td");
+            td.innerText = totals[m];
+            totalTr.appendChild(td);
+        });
+
+        tbody.appendChild(totalTr);
+    }
+
+    window.onload = loadMeals;
+</script>
+
+</body>
+</html>
